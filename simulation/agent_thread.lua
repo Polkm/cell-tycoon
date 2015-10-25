@@ -4,7 +4,8 @@ require("love.image")
 require("love.math")
 require("love.physics")
 require("love.filesystem")
-require("noise")
+require("core/noise")
+
 inputChannel, outputChannel, cellImage, props, body = ...
 
 local startTime = love.timer.getTime()
@@ -18,8 +19,6 @@ local massX, massY = 0, 0
 local forX, forY = 0, 0
 
 math.randomseed(props.seed)
--- -- love.math.setRandomSeed(props.seed)
--- -- assert(false, props.seed)
 math.random()
 math.random()
 math.random()
