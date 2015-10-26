@@ -43,14 +43,14 @@ hook(love, "mousepressed", function(x, y, button)
           dragJoint:destroy()
           dragJoint = nil
         end
-        dragJoint = love.physics.newMouseJoint(hoverAgent.body(), mx, my)
+        dragJoint = love.physics.newMouseJoint(hoverAgent.body, mx, my)
       end
     end
     lastClick = love.timer.getTime()
   end
   if button == "r" then
     if hoverAgent then
-      hoverAgent.setSellected(not hoverAgent.getSellected())
+      hoverAgent.sellected = not hoverAgent.sellected
     end
   end
 end)
