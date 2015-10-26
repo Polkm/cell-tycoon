@@ -58,6 +58,11 @@ function table.count(tbl)
   return c
 end
 
+function table.contains(tbl, element)
+  for _, v in pairs(tbl) do if v == element then return true end end
+  return false
+end
+
 -- Returns a random value from the table
 function table.random(tbl)
   if type(tbl) ~= "table" then return end

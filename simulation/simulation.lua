@@ -1,21 +1,24 @@
-require("simulation/camera")
-require("simulation/physics")
-require("simulation/agent")
-require("simulation/dragdrop")
-require("simulation/background")
-
-math.randomseed(os.time())
-math.random()
-math.random()
-math.random()
-
 simulation = {}
 simulation.agents = {}
 simulation.sortedAgents = {}
 simulation.size = 400
 simulation.agentSize = 64
 
-function love.load()
+require("simulation/camera")
+require("simulation/physics")
+require("simulation/gui")
+require("simulation/agent")
+require("simulation/dragdrop")
+require("simulation/background")
+require("simulation/scoreboard")
+
+
+math.randomseed(os.time())
+math.random()
+math.random()
+math.random()
+
+hook(love, "load", function()
   local points = {}
   for i = 0, math.pi * 2, math.pi * 2 / 30 do
     points[#points + 1] = math.cos(i) * (simulation.size)
@@ -34,7 +37,7 @@ function love.load()
     points[#points + 1] = math.sin(i) * (simulation.size + 8)
   end
   love.physics.newFixture(love.physics.newBody(world, x, y, type or "static"), love.physics.newChainShape(true, points)):getBody()
-end
+end)
 
 local lastSpawn
 hook(love, "update", function(dt)
@@ -60,7 +63,7 @@ hook(love, "update", function(dt)
     agent.update(dt)
   end
 
-  guisUpdate(dt)
+  gui.update(dt)
 end)
 
 function love.draw()
@@ -70,88 +73,12 @@ function love.draw()
 
   background.draw()
 
-  love.graphics.setColor(255, 255, 255, 255)
-  love.graphics.setInvertedStencil(function()
-    love.graphics.push()
-    love.graphics.clear()
-    love.graphics.translate(love.graphics.getWidth() * 0.5, love.graphics.getHeight() * 0.5)
-    love.graphics.scale(camera.z, camera.z)
-    love.graphics.translate(-camera.x, -camera.y)
-    love.graphics.circle("fill", 0, 0, simulation.size, 100)
-    love.graphics.pop()
-  end)
-
-  local agentCount = 0
-  local firstAgent
-  local columnWidths = {}
-  local statsToNames = {"name", "age", "mass", "points"}
-  simulation.sortedAgents = {}
-  for _, agent in pairs(simulation.agents) do
-    if not firstAgent then
-      firstAgent = agent
-    end
-    for ii, stat in pairs(firstAgent.getStats()) do
-      local width = love.graphics.getFont():getWidth(agent.getStats()[ii])
-      if not columnWidths[ii] or columnWidths[ii] < width then
-        columnWidths[ii] = width
-      end
-    end
-    agentCount = agentCount + 1
-    simulation.sortedAgents[#simulation.sortedAgents + 1] = agent
-  end
-  for ii, stat in pairs(firstAgent.getStats()) do
-    local width = love.graphics.getFont():getWidth(translate(statsToNames[ii]))
-    if not columnWidths[ii] or columnWidths[ii] < width then
-      columnWidths[ii] = width
-    end
-  end
-  local bufferY = 50
-  local lineHeight = 18 --math.min((love.graphics.getHeight() - bufferY * 2) / (7*7), 16)
-  love.graphics.setFont(cache.get.font("fonts/boku2.otf", lineHeight))
-  local sortStat = 4
-  table.sort(simulation.sortedAgents, function(a, b)
-    local aStats = a.getStats()
-    local bStats = b.getStats()
-    return (aStats[sortStat] or 0) > (bStats[sortStat] or 0)
-  end)
-  if firstAgent then
-    local x = screenW - 300
-    love.graphics.setColor(180, 180, 180, 255)
-    for ii, stat in pairs(firstAgent.getStats()) do
-      gui(x, bufferY, translate(statsToNames[ii]))
-      x = x + columnWidths[ii] + 10
-    end
-    for _, agent in pairs(simulation.agents) do
-      local c = 1
-      for i, check in pairs(simulation.sortedAgents) do
-        if agent == check then break end
-        c = c + 1
-      end
-      x = screenW - 300
-      for ii, stat in pairs(firstAgent.getStats()) do
-        if hoverAgent == agent then
-          love.graphics.setColor(255, 255, 255, 255)
-        elseif agent.getSellected() then
-          love.graphics.setColor(230, 230, 230, 255)
-        else
-          love.graphics.setColor(180, 180, 180, 255)
-        end
-        gui(x, bufferY + c * lineHeight, (agent.getStats())[ii])
-        x = x + columnWidths[ii] + 10
-      end
-    end
-  end
-
-  guisDraw()
-
-  love.graphics.setInvertedStencil(nil)
-
-
-
   love.graphics.push()
   love.graphics.translate(love.graphics.getWidth() * 0.5, love.graphics.getHeight() * 0.5)
   love.graphics.scale(camera.z, camera.z)
   love.graphics.translate(-camera.x, -camera.y)
+
+  gui.draw()
 
   love.graphics.setStencil(function()
     love.graphics.circle("fill", 0, 0, simulation.size, 100)

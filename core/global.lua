@@ -4,7 +4,6 @@ require("core/cache")
 require("core/noise")
 
 require("core/data_structures")
-require("core/gui")
 
 console = ""
 language = "en"

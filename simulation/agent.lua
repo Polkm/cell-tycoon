@@ -22,7 +22,11 @@ function agent(size, seed)
     -- seedp = seed
     seedp = math.random(),
   }
-  local age = 0
+
+  p.name = "" .. seed
+  p.age = 0
+  p.mass = 0
+  p.points = 0
 
   simulation.agents[#simulation.agents + 1] = p
   local id = #simulation.agents
@@ -53,7 +57,6 @@ function agent(size, seed)
     x, y, z = nx, ny, nz or z
   end
   function p.getXYZ() return x, y, z end
-  function p.age() return age end
 
   function p.setCell(x, y, v)
     inputChannel:push({func = "set", x = x, y = y, v = v})
@@ -71,10 +74,6 @@ function agent(size, seed)
   function p.feed(cellMass)
     inputChannel:push({func = "feed", cellMass = cellMass})
     -- assert(false, cellMass)
-  end
-
-  function p.getStats()
-    return {math.floor(props.seed), math.floor(age or 0), math.floor(info.cellCount or 0), math.floor(math.max(info.massEaten / age, 0))}
   end
 
   function p.postSolve(b, coll, normalimpulse1, tangentimpulse1, normalimpulse2, tangentimpulse2)
@@ -98,7 +97,7 @@ function agent(size, seed)
 
       cellImage:refresh()
 
-      age = age + dt
+      p.age = p.age + dt
 
       local msg = outputChannel:pop()
       while msg do
@@ -108,6 +107,8 @@ function agent(size, seed)
           end
         else
           info = msg
+          p.mass = info.cellCount
+          p.points = info.massEaten / math.max(p.age, 3)
           local avgX, avgY = info.massX / info.cellCount, info.massY / info.cellCount
           -- assert(avgX == 0)
           fixture, shape = reshape(avgX - size * 0.5, avgY - size * 0.5, math.max(math.sqrt(info.cellCount) * 0.8, 1))
@@ -128,7 +129,7 @@ function agent(size, seed)
         -- outputChannel:clear()
         msg = outputChannel:pop()
       end
-      if age > 0.5 and info.cellCount <= 5 then
+      if p.age > 0.5 and info.cellCount <= 5 then
         p.remove()
       end
     end

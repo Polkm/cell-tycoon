@@ -24,6 +24,7 @@ function love.image.minmax(img)
   return minx, miny, maxx, maxy
 end
 
+function love.load() end
 function love.update(dt) end
 function love.draw() end
 function love.mousepressed(x, y, button) end
