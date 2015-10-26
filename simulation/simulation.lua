@@ -12,31 +12,20 @@ require("simulation/dragdrop")
 require("simulation/background")
 require("simulation/scoreboard")
 
-
 math.randomseed(os.time())
 math.random()
 math.random()
 math.random()
 
 hook(love, "load", function()
-  local points = {}
-  for i = 0, math.pi * 2, math.pi * 2 / 30 do
-    points[#points + 1] = math.cos(i) * (simulation.size)
-    points[#points + 1] = math.sin(i) * (simulation.size)
+  for j = 0, 3 do
+    local points = {}
+    for i = 0, math.pi * 2, math.pi * 2 / 30 do
+      points[#points + 1] = math.cos(i) * (simulation.size + j * 4)
+      points[#points + 1] = math.sin(i) * (simulation.size + j * 4)
+    end
+    love.physics.newFixture(love.physics.newBody(world, x, y, type or "static"), love.physics.newChainShape(true, points)):getBody()
   end
-  love.physics.newFixture(love.physics.newBody(world, x, y, type or "static"), love.physics.newChainShape(true, points)):getBody()
-  points = {}
-  for i = 0, math.pi * 2, math.pi * 2 / 30 do
-    points[#points + 1] = math.cos(i) * (simulation.size + 4)
-    points[#points + 1] = math.sin(i) * (simulation.size + 4)
-  end
-  love.physics.newFixture(love.physics.newBody(world, x, y, type or "static"), love.physics.newChainShape(true, points)):getBody()
-  points = {}
-  for i = 0, math.pi * 2, math.pi * 2 / 30 do
-    points[#points + 1] = math.cos(i) * (simulation.size + 8)
-    points[#points + 1] = math.sin(i) * (simulation.size + 8)
-  end
-  love.physics.newFixture(love.physics.newBody(world, x, y, type or "static"), love.physics.newChainShape(true, points)):getBody()
 end)
 
 local lastSpawn
