@@ -19,24 +19,20 @@ hook(love, "update", function(dt)
   -- camera.x = math.min(math.max(camera.x, minX), maxX)
   -- camera.y = math.min(math.max(camera.y, minY), maxY)
 
+  local mx, my = camera.getMouseWorldPosition()
+  local dz = camera.z
   camera.z = lerp(camera.z, targetZ, 0.2)
+  dz = (camera.z - dz) / camera.z
+  camera.x = camera.x - (camera.x - mx) * dz
+  camera.y = camera.y - (camera.y - my) * dz
 end)
 
 hook(love, "mousepressed", function(x, y, button)
-  local mx, my = camera.getMouseWorldPosition()
   if button == "wu" then
-    local dz = camera.z
     targetZ = math.min(camera.z + 0.3, 6)
-    dz = (camera.z - dz) / camera.z
-    camera.x = camera.x - (camera.x - mx) * dz
-    camera.y = camera.y - (camera.y - my) * dz
   end
   if button == "wd" then
-    local dz = camera.z
     targetZ = math.max(camera.z - 0.3, 0.3)
-    dz = (camera.z - dz) / camera.z
-    camera.x = camera.x - (camera.x - mx) * dz
-    camera.y = camera.y - (camera.y - my) * dz
   end
 end)
 

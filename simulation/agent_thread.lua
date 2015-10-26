@@ -82,13 +82,13 @@ local function growthDirection(x, y)
   end
 end
 
-local size = props.seedp * 0.5 + 0.5
+local size = props.seed * 0.5 + 0.5
 
 -- local octaves, amplitude, gain, frequency, lacunarity = math.random(1, 8), 1, 1 - math.random(), 0.05, 1.5 + math.random()
 local octaves, amplitude, gain, frequency, lacunarity = 2, 1, 0.8, 0.05, 2
 
 local function cull(x, y)
-  local s = 1--math.min(props.seedp, 1)
+  local s = 1--math.min(props.seed, 1)
   -- local s = math.max(math.min(((love.timer.getTime() - startTime) / 4), 1), 0)
   local r = math.simplexNoise(math.abs(x - maxSize * 0.5) / s, (y - maxSize * 0.5) / s, octaves, amplitude, gain, frequency, lacunarity, props.seed)
   local fx, fy = x - maxSize * 0.5, y - maxSize * 0.5

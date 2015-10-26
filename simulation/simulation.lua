@@ -35,15 +35,7 @@ hook(love, "update", function(dt)
   local n = math.pow(7, 2)
   if (not lastSpawn or lastSpawn + 0 < love.timer.getTime()) and agentCount < n then
     lastSpawn = love.timer.getTime()
-    local w = math.floor(math.sqrt(n))
-    local ww = w * simulation.agentSize * 0.25
-    local ag = agent(simulation.agentSize, math.random() * 4375834)
-    -- local ag = agent(seeda + love.math.noise(math.floor(i / 10) / 100) * 25235)
-    -- local ag = agent(love.math.noise(seeda + math.floor(i / 10)) * 342)
-    -- local x, y = (i % w) * (simulation.agentSize * 1) - ww, math.floor(i / w) * (simulation.agentSize * 1) - ww
-    local a, d = math.random() * math.pi * 2, math.random() * (simulation.size * 0.9 - simulation.agentSize)
-    local x, y = math.cos(a) * d, math.sin(a) * d
-    ag.setXYZ(x, y)
+    agent({}).setXYZ(math.randomDiscXY(0, 0, simulation.size * 0.9 - simulation.agentSize))
   end
 
   world:update(dt)
