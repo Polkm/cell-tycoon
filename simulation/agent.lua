@@ -23,10 +23,12 @@ function agent(p)
   p.points = 0
   p.sellected = false
 
-  local thread = love.thread.newThread("simulation/agent_thread.lua")
-  local inputChannel = love.thread.newChannel()
-  local outputChannel = love.thread.newChannel()
-  thread:start(inputChannel, outputChannel, p.cellImage, {seed = p.seed}, p.body)
+  foreman.push({func = "init", id = p.id, p.cellImage, p.body, p.seed})
+
+  -- local thread = love.thread.newThread("simulation/agent_thread.lua")
+  -- local inputChannel = love.thread.newChannel()
+  -- local outputChannel = love.thread.newChannel()
+  -- thread:start(inputChannel, outputChannel, p.cellImage, {seed = p.seed}, p.body)
 
   function p.setXYZ(nx, ny, nz)
     p.body:setPosition(nx, ny)
@@ -36,7 +38,7 @@ function agent(p)
 
   -- Cell manipulation
   function p.setCell(x, y, v)
-    inputChannel:push({func = "set", x = p.x, y = p.y, v = v})
+    foreman.push({func = "set", id = p.id, p.x, p.y, v})
   end
 
   function p.bite(wx, wy, r, biter)
@@ -44,50 +46,36 @@ function agent(p)
     local an = math.atan2(dy, dx) - p.body:getAngle() - math.pi
     local rad = math.sqrt(dx * dx + dy * dy)
     p.body:setUserData(p)
-    inputChannel:push({func = "bite", x = math.cos(an) * rad + p.maxSize * 0.5, y = math.sin(an) * rad + p.maxSize * 0.5, r = r, id = p.id})
+    foreman.push({func = "bite", id = p.id, biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
   end
 
   function p.feed(cellMass)
-    inputChannel:push({func = "feed", cellMass = cellMass})
+    foreman.push({func = "feed", id = p.id, cellMass})
   end
 
   function p.update(dt)
     if p.body and not p.body:isDestroyed() then
-      inputChannel:push("think")
-
-      p.cellImage:refresh()
-
       p.age = p.age + dt
 
-      repeat
-        local msg = outputChannel:pop()
-        if msg then
-          if msg.func == "feed" then
-            if simulation.agents[msg.id] then
-              simulation.agents[msg.id].feed(msg.removedMass or 0)
-            end
-          else
-            p.mass = msg.cellCount
-            p.massEaten = msg.massEaten
-            p.points = msg.massEaten / math.max(p.age, 3)
+      p.x, p.y = p.body:getPosition()
+      p.rot = p.body:getAngle()
 
-            local avgX, avgY = msg.massX / msg.cellCount, msg.massY / msg.cellCount
-            fixture, shape = reshape(avgX - p.maxSize * 0.5, avgY - p.maxSize * 0.5, math.max(math.sqrt(msg.cellCount) * 0.8, 1))
-            p.body:setBullet(true)
-            p.body:applyForce(msg.forX, msg.forY)
-
-            p.x, p.y = p.body:getPosition()
-            p.rot = p.body:getAngle()
-          end
-        end
-      until not msg
-
-      -- Kill yourself if you suck ass at growing
-      -- if p.age > 1 and p.mass <= 5 then p.remove() end
-
+      -- Kill yourself if you suck ass at growing or are ded already
       if p.age > 0.5 and p.mass <= 0 then p.remove() return end
     end
   end
+
+  function p.cultureUpdate(cellCount, massEaten, massX, massY, forX, forY)
+      p.cellImage:refresh()
+
+      p.mass = cellCount or 0
+      p.massEaten = massEaten or 0
+      p.points = p.massEaten / math.max(p.age, 3)
+
+      fixture, shape = reshape(massX - p.maxSize * 0.5, massY - p.maxSize * 0.5, math.max(math.sqrt(p.mass) * 0.8, 1))
+      p.body:setBullet(true)
+      p.body:applyForce(forX, forY)
+    end
 
   function p.postSolve(b, coll, normalimpulse1, tangentimpulse1, normalimpulse2, tangentimpulse2)
     if b:getUserData() then
@@ -137,11 +125,9 @@ function agent(p)
   end
 
   function p.remove()
-    inputChannel:push("die")
-    thread:wait()
+    foreman.push({func = "remove", id = p.id})
     p.body:destroy()
     p.body = nil
-    -- thread:kill()
     for _, agent in pairs(simulation.agents) do
       if agent == p then
         simulation.agents[_] = nil

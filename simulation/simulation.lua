@@ -11,6 +11,7 @@ require("simulation/agent")
 require("simulation/dragdrop")
 require("simulation/background")
 require("simulation/scoreboard")
+require("simulation/foreman")
 
 math.randomseed(os.time())
 math.random()

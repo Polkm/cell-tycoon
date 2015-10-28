@@ -1,3 +1,10 @@
+require("love.timer")
+require("love.graphics")
+require("love.image")
+require("love.math")
+require("love.physics")
+require("love.filesystem")
+
 require("core/lua_extended")
 require("core/love_extended")
 require("core/cache")
