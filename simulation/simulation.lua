@@ -12,6 +12,8 @@ require("simulation/dragdrop")
 require("simulation/background")
 require("simulation/scoreboard")
 require("simulation/foreman")
+require("simulation/tracking")
+require("simulation/disposable/panel")
 
 math.randomseed(os.time())
 math.random()
@@ -100,6 +102,8 @@ function love.draw()
   end
 
   love.graphics.pop()
+
+  panel.draw()
 
   -- Finaly top left console
   love.graphics.setColor(255, 255, 255, 255)
