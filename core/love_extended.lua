@@ -30,3 +30,5 @@ function love.draw() end
 function love.mousepressed(x, y, button) end
 function love.mousereleased(x, y, button) end
 function love.mousemoved(x, y, dx, dy) end
+function love.keypressed(key, unicode) end
+function love.keyreleased(key, unicode) end

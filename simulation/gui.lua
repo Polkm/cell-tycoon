@@ -146,7 +146,7 @@ function gui.column(p)
     if not maxWidth or maxWidth < width then maxWidth = width end
     return maxWidth
   end
-  
+
   return p
 end
 
