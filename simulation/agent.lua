@@ -23,7 +23,7 @@ function agent(p)
   p.points = 0
   p.sellected = false
 
-  foreman.push({func = "init", id = p.id, p.cellImage, p.body, p.seed})
+  foreman.push({func = "init", id = p.id, p.cellImage, p.seed})
 
   -- local thread = love.thread.newThread("simulation/agent_thread.lua")
   -- local inputChannel = love.thread.newChannel()
@@ -65,7 +65,7 @@ function agent(p)
     end
   end
 
-  function p.cultureUpdate(cellCount, massEaten, massX, massY, forX, forY)
+  function p.cultureUpdate(cellCount, massEaten, massX, massY, forwardForce)
       p.cellImage:refresh()
 
       p.mass = cellCount or 0
@@ -74,7 +74,8 @@ function agent(p)
 
       fixture, shape = reshape(massX - p.maxSize * 0.5, massY - p.maxSize * 0.5, math.max(math.sqrt(p.mass) * 0.8, 1))
       p.body:setBullet(true)
-      p.body:applyForce(forX, forY)
+      local angle = p.body:getAngle() - math.pi * 0.5
+      p.body:applyForce(math.cos(angle) * forwardForce, math.sin(angle) * forwardForce)
     end
 
   function p.postSolve(b, coll, normalimpulse1, tangentimpulse1, normalimpulse2, tangentimpulse2)

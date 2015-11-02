@@ -63,6 +63,7 @@ function love.draw()
   love.graphics.translate(-camera.x, -camera.y)
 
   gui.draw()
+  panel.draw()
 
   love.graphics.setStencil(function()
     love.graphics.circle("fill", 0, 0, simulation.size, 100)
@@ -103,7 +104,7 @@ function love.draw()
 
   love.graphics.pop()
 
-  panel.draw()
+
 
   -- Finaly top left console
   love.graphics.setColor(255, 255, 255, 255)

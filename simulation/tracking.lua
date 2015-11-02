@@ -17,13 +17,13 @@ local treb = love.graphics.newFont("fonts/trebuchet.ttf",18)
 local mainmenu = {
   --trying a new way to manage a menu, its a table of panels
   save = panel.new({
-    x = w - 150 , y = h,
+    x = -105, y = simulation.size + 10,
     size = {100,50},
     text = "save",
     font = treb,
   }),
   load = panel.new({
-    x = w + 50 , y = h,
+    x = 5, y = simulation.size + 10,
     size = {100,50},
     text = "load",
     font = treb,

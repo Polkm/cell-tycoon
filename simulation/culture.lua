@@ -5,17 +5,15 @@ function culture(p, worker, id)
   p.maxSize = maxSize
   p.id = id
 
-  function p.init(cellImage, body, seed, id)
+  function p.init(cellImage, seed, id)
     p.startTime = love.timer.getTime()
     p.lifetime = 1
 
     p.cellCount = 0
     p.massEaten = 0
     p.massX, p.massY = 0, 0
-    p.forX, p.forY = 0, 0
 
     p.cellImage = cellImage
-    p.body = body
     p.seed = seed
     p.id = id
 
@@ -34,7 +32,6 @@ function culture(p, worker, id)
   function p.remove()
     worker.cultures[id] = nil
     p.cellImage = nil
-    p.body = nil
   end
 
   local function setCell(x, y, v)
@@ -138,7 +135,7 @@ function culture(p, worker, id)
   function p.update(dt)
     local time = love.timer.getTime()
 
-    forX, forY = 0, 0
+    local forwardForce = 0
 
     local count = 0
     for i, v in pairs(cells) do
@@ -147,37 +144,29 @@ function culture(p, worker, id)
       local x, y = i % maxSize, math.floor(i / maxSize)
       x, y = math.floor(x), math.floor(y)
 
+      -- Cost of life
+      v.en = math.max(v.en - 1 * dt, 0)
+
+      -- Photosynthesis
       if v.type == "plast" then
-        setCell(x, y, {["time"] = v.time, type = v.type, en = 1})
+        v.en = math.min(v.en + 10 * dt, 1)
       end
 
-      if v.type == "stem" then
-        if v.en >= 0.5 then
-          setCell(x, y, {["time"] = v.time, type = v.type, en = v.en - 0.5})
-          local a = 0
-          if p.body and not p.body:isDestroyed() then
-            a = p.body:getAngle() - math.pi * 0.5
-          end
-          local forwardX, forwardY = math.cos(a), math.sin(a)
-          forX, forY = forX + forwardX * 5, forY + forwardY * 5
-        end
+      if v.type == "stem" and v.en >= 0.5 then
+        forwardForce = forwardForce + 100 * dt
       end
 
-      if v.type ~= "plast" and v.en > 0 then
-        setCell(x, y, {["time"] = v.time, type = v.type, en = math.max(v.en - 0.01, 0)})
-      end
-
+      local gx, gy = growthDirection(x, y)
       if v.en > 0 then
-        local gx, gy = growthDirection(x, y)
         local gv = getCell(gx, gy)
         if gv then
-          setCell(gx, gy, {["time"] = gv.time, type = gv.type, en = gv.en + v.en * 0.5})
-          setCell(x, y, {["time"] = v.time, type = v.type, en = v.en * 0.5})
+          local enGiven = math.min(v.en * 0.5, 1 - gv.en)
+          gv.en = gv.en + enGiven
+          v.en = v.en - enGiven
         end
       end
 
       -- if age > 0.1 and age < lifetime then
-        local gx, gy = growthDirection(x, y)
         if v.en > 0.5 and growthLimit(x, y, gx, gy, age) then
           -- setCell(x, y, {["time"] = time})
           local type = "stem"
@@ -209,7 +198,7 @@ function culture(p, worker, id)
       avgX, avgY = avgX / count, avgY / count
     end
 
-    worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, forX, forY})
+    worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, forwardForce})
   end
 
   return p
