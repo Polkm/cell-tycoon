@@ -1,3 +1,5 @@
+require("simulation/cell")
+
 function culture(p, worker, id)
   local cells = {}
   local typeMap = {}
@@ -5,7 +7,7 @@ function culture(p, worker, id)
   p.maxSize = maxSize
   p.id = id
 
-  function p.init(cellImage, seed, id)
+  function p.init(imageData, seed, id)
     p.startTime = love.timer.getTime()
     p.lifetime = 1
 
@@ -13,7 +15,7 @@ function culture(p, worker, id)
     p.massEaten = 0
     p.massX, p.massY = 0, 0
 
-    p.cellImage = cellImage
+    p.imageData = imageData
     p.seed = seed
     p.id = id
 
@@ -22,7 +24,7 @@ function culture(p, worker, id)
     math.random()
     math.random()
 
-    p.setCell(p.maxSize * 0.5, p.maxSize * 0.5, {["time"] = love.timer.getTime(), type = "brain", en = 10})
+    p.setCell(p.maxSize * 0.5, p.maxSize * 0.5, cell({type = "brain", energy = 10}))
     p.setTypeRange(0, 10, "brain")
     for i = 1, math.random(1, 3) do
       p.setRandomTypeRange("plast")
@@ -31,7 +33,7 @@ function culture(p, worker, id)
 
   function p.remove()
     worker.cultures[id] = nil
-    p.cellImage = nil
+    p.imageData = nil
   end
 
   local function setCell(x, y, v)
@@ -59,12 +61,11 @@ function culture(p, worker, id)
   end
 
   local function renderCells()
-    if p.cellImage then
-      local data = p.cellImage:getData()
-      data:mapPixel(function(x, y, r, g, b, a)
+    if p.imageData then
+      p.imageData:mapPixel(function(x, y, r, g, b, a)
         local v = getCell(x, y)
         if v then
-          local d = 1 - v.en
+          local d = 1 - v.energy
           local ra, ga, ba, rb, gb, bb = getTypeColor(v.type)
           local r, g, b = clamp(lerp(ra, rb, d), 0, 255), clamp(lerp(ga, gb, d), 0, 255), clamp(lerp(ba, bb, d), 0, 255)
           return r, g, b, 150
@@ -91,7 +92,7 @@ function culture(p, worker, id)
     local fx, fy = x - maxSize * 0.5, y - maxSize * 0.5
     local dist = math.floor(math.sqrt(fx * fx + fy * fy))
     local v = getCell(x, y)
-    if v and love.timer.getTime() - v.time > 2 and v.en <= 0 then return true end
+    if v and v.age > 2 and v.energy <= 0 then return true end
     return p.cellCount > 4 and dist > 0 and (r < -0.2 + (dist / (maxSize * 0.5)) or dist > math.ceil(maxSize * 0.5))
   end
 
@@ -140,43 +141,44 @@ function culture(p, worker, id)
     local count = 0
     for i, v in pairs(cells) do
       count = count + 1
-      local age = time - v.time
+      local age = v.age
       local x, y = i % maxSize, math.floor(i / maxSize)
       x, y = math.floor(x), math.floor(y)
 
       -- Cost of life
-      v.en = math.max(v.en - 1 * dt, 0)
+      v.energy = math.max(v.energy - 1 * dt, 0)
+      v.age = v.age + dt
 
       -- Photosynthesis
       if v.type == "plast" then
-        v.en = math.min(v.en + 10 * dt, 1)
+        v.energy = math.min(v.energy + 10 * dt, 1)
       end
 
-      if v.type == "stem" and v.en >= 0.5 then
+      if v.type == "stem" and v.energy >= 0.5 then
         forwardForce = forwardForce + 100 * dt
       end
 
       local gx, gy = growthDirection(x, y)
-      if v.en > 0 then
+      if v.energy > 0 then
         local gv = getCell(gx, gy)
         if gv then
-          local enGiven = math.min(v.en * 0.5, 1 - gv.en)
-          gv.en = gv.en + enGiven
-          v.en = v.en - enGiven
+          local enGiven = math.min(v.energy * 0.5, 1 - gv.energy)
+          gv.energy = gv.energy + enGiven
+          v.energy = v.energy - enGiven
         end
       end
 
       -- if age > 0.1 and age < lifetime then
-        if v.en > 0.5 and growthLimit(x, y, gx, gy, age) then
-          -- setCell(x, y, {["time"] = time})
-          local type = "stem"
-          if typeMap[p.cellCount] then
-            type = typeMap[p.cellCount]
-          end
-          setCell(gx, gy, {["time"] = time, type = type, en = 0})
-          p.cellCount = p.cellCount + 1
-          p.massX, p.massY = p.massX + (gx - maxSize * 0.5), p.massY + (gy - maxSize * 0.5)
+      if v.energy > 0.5 and growthLimit(x, y, gx, gy, v.age) then
+        -- setCell(x, y, {["time"] = time})
+        local type = "stem"
+        if typeMap[p.cellCount] then
+          type = typeMap[p.cellCount]
         end
+        setCell(gx, gy, cell({type = type}))
+        p.cellCount = p.cellCount + 1
+        p.massX, p.massY = p.massX + (gx - maxSize * 0.5), p.massY + (gy - maxSize * 0.5)
+      end
       -- end
 
       if cull(x, y) then

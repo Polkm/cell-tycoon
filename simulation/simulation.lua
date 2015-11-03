@@ -104,9 +104,10 @@ function love.draw()
 
   love.graphics.pop()
 
-
-
   -- Finaly top left console
   love.graphics.setColor(255, 255, 255, 255)
-  love.graphics.printf(console, 0, 0, 9999999)
+  local display = ""
+  display = display .. love.timer.getFPS() .. "\n"
+  love.graphics.setFont(cache.get.font("fonts/boku2.otf", 12))
+  love.graphics.printf(display .. console, 0, 0, 9999999)
 end

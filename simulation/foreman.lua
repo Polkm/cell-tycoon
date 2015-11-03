@@ -1,4 +1,4 @@
-local idealThreads = love.system.getProcessorCount()
+local idealThreads = math.max(love.system.getProcessorCount() - 2, 1)
 
 foreman = {}
 

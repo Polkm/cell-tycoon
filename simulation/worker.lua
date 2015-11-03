@@ -32,4 +32,6 @@ while alive do
       p[func](unpack(input))
     end
   end
+
+  -- assert(table.count(p.cultures) < 15)
 end

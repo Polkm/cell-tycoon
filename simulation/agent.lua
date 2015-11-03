@@ -23,7 +23,7 @@ function agent(p)
   p.points = 0
   p.sellected = false
 
-  foreman.push({func = "init", id = p.id, p.cellImage, p.seed})
+  foreman.push({func = "init", id = p.id, p.cellImage:getData(), p.seed})
 
   -- local thread = love.thread.newThread("simulation/agent_thread.lua")
   -- local inputChannel = love.thread.newChannel()
@@ -46,7 +46,7 @@ function agent(p)
     local an = math.atan2(dy, dx) - p.body:getAngle() - math.pi
     local rad = math.sqrt(dx * dx + dy * dy)
     p.body:setUserData(p)
-    foreman.push({func = "bite", id = p.id, biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
+    foreman.push({func = "bite", id = p.id, biter ~= nil and biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
   end
 
   function p.feed(cellMass)
@@ -61,18 +61,20 @@ function agent(p)
       p.rot = p.body:getAngle()
 
       -- Kill yourself if you suck ass at growing or are ded already
-      if p.age > 0.5 and p.mass <= 0 then p.remove() return end
+      if p.age > 0.5 and p.mass <= 1 then p.remove() return end
     end
   end
 
   function p.cultureUpdate(cellCount, massEaten, massX, massY, forwardForce)
-      p.cellImage:refresh()
 
-      p.mass = cellCount or 0
+
+      p.mass = math.max(cellCount or 1, 1)
       p.massEaten = massEaten or 0
       p.points = p.massEaten / math.max(p.age, 3)
 
-      fixture, shape = reshape(massX - p.maxSize * 0.5, massY - p.maxSize * 0.5, math.max(math.sqrt(p.mass) * 0.8, 1))
+      massX, massY = massX - p.maxSize * 0.5, massY - p.maxSize * 0.5
+
+      fixture, shape = reshape(massX, massY, math.max(math.sqrt(p.mass) * 0.8, 1))
       p.body:setBullet(true)
       local angle = p.body:getAngle() - math.pi * 0.5
       p.body:applyForce(math.cos(angle) * forwardForce, math.sin(angle) * forwardForce)
@@ -82,7 +84,7 @@ function agent(p)
     if b:getUserData() then
         if b and not b:isDestroyed() and b:getUserData() and not coll:isDestroyed() then
           local x1, y1, x2, y2 = coll:getPositions()
-          b:getUserData().bite(x1, y1, 5, p.body)
+          b:getUserData().bite(x1, y1, 5, p)
         end
     else
       -- Spin around when you hit a wall
@@ -93,6 +95,8 @@ function agent(p)
   local ringAlpha = 0
 
   function p.draw()
+    p.cellImage:refresh()
+
     if hoverAgent == p or p.sellected or simulation.sortedAgents[1] == p then
       ringAlpha = math.min(ringAlpha + love.timer.getDelta() * 250, 50)
     else
