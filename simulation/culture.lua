@@ -47,26 +47,13 @@ function culture(p, worker, id)
   end
   p.getCell = getCell
 
-  local ra, ga, ba = 255, 68, 114
-  local rb, gb, bb = 68, 52, 101
-
-  local function getTypeColor(type)
-    if type == "stem" then
-      return 255, 68, 114, 68, 52, 101
-    elseif type == "brain" then
-      return 77, 213, 145, 93, 153, 111
-    elseif type == "plast" then
-      return 132, 219, 44, 50, 128, 50
-    end
-  end
-
   local function renderCells()
     if p.imageData then
       p.imageData:mapPixel(function(x, y, r, g, b, a)
         local v = getCell(x, y)
         if v then
           local d = 1 - v.energy
-          local ra, ga, ba, rb, gb, bb = getTypeColor(v.type)
+          local ra, ga, ba, rb, gb, bb = v.getColors()
           local r, g, b = clamp(lerp(ra, rb, d), 0, 255), clamp(lerp(ga, gb, d), 0, 255), clamp(lerp(ba, bb, d), 0, 255)
           return r, g, b, 150
         end
