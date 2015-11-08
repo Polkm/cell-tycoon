@@ -29,6 +29,8 @@ function clamp(v, l, h) return math.min(math.max(v, l), h) end
 function lerp(a, b, d) return a + (b - a) * clamp(d, 0, 1) end
 function lerp3(ax, ay, az, bx, by, bz, d) return lerp(a, b, d), lerp(a, b, d), lerp(a, b, d) end
 
+function dist(ax, ay, bx, by) local dx, dy = bx - ax, by - ay return math.sqrt(dx * dx + dy * dy) end
+
 function hook(tbl, key, fnc)
   local old = tbl[key]
   tbl[key] = function(...)

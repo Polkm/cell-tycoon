@@ -95,8 +95,6 @@ function agent(p)
   local ringAlpha = 0
 
   function p.draw()
-    p.cellImage:refresh()
-
     if hoverAgent == p or p.sellected or simulation.sortedAgents[1] == p then
       ringAlpha = math.min(ringAlpha + love.timer.getDelta() * 250, 50)
     else
@@ -126,6 +124,7 @@ function agent(p)
     end
     love.graphics.setColor(255, 255, 255, 255)
 
+    p.cellImage:refresh()
     love.graphics.draw(p.cellImage, p.x, p.y, p.rot, 1, 1, p.cellImage:getWidth() * 0.5, p.cellImage:getHeight() * 0.5)
   end
 
