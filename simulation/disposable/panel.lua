@@ -89,7 +89,7 @@ function new(initTable)
 
 	-- Hovering
 	function public.hovering()
-		local msX, msY = love.mouse.getX(), love.mouse.getY()
+		local msX, msY = camera.getMouseWorldPosition()
 		local x,y = public.getScreenPos()
 		return msX >= x and msY >= y and msX <= (x + width) and msY <= (y + height)
 	end
