@@ -38,12 +38,6 @@ local mainmenu = {
     text = "pause",
     font = treb,
   }),
-  resume = panel.new({
-    x = -105, y = simulation.size + 70,
-    size = {100,50},
-    text = "resume",
-    font = treb,
-  }),
 }
 
 local save = mainmenu.save
@@ -51,21 +45,46 @@ local load = mainmenu.load
 local pause = mainmenu.pause
 local resume = mainmenu.resume
 
-function saveGame()
+pause.update = function() if(paused) then pause.setText("unpause") else pause.setText("pause") end end
+
+local function pauseGame() paused = not paused end
+
+local function saveGame()
   paused = true
   local file, errorstr = fs.newFile("results.txt", "w")
   if (errorstr) then print(errorstr) return end
-  print("written")
 
+  for key, agent in pairs(simulation.agents) do
+    foreman.push({func = "evaluate",id = agent.id})
+  end
+
+  local total = 0
+  local stem = 0
+  local brain = 0
+  local plast = 0
+  local mover = 0
+
+  for key, agent in pairs(simulation.agents) do
+     total = total + (agent.celldata['numcells'] or 0)
+     stem = stem + (agent.celldata['stem'] or 0)
+     brain = brain + (agent.celldata['brain'] or 0)
+     plast = plast + (agent.celldata['plast'] or 0)
+     mover = mover + (agent.celldata['mover'] or 0)
+  end
+  println(total)
   file:write("Agent Count : " .. #simulation.agents .. "\r\n")
+  file:write("--Cell Breakdown--\r\n")
+  file:write("Stem % : " .. stem/total .. "\r\n")
+  file:write("Brain % : " .. brain/total .. "\r\n")
+  file:write("Plast % : " .. plast/total .. "\r\n")
+  file:write("Mover % : " .. mover/total .. "\r\n")
+
   file:flush()
   file:close()
-
-  print(fs.getWorkingDirectory())
-  print(result)
 end
 
 save.onClick = saveGame
+pause.onClick = pauseGame
 
 for key,panel in pairs(mainmenu) do
   panel.setVisible(false)

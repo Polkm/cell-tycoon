@@ -22,6 +22,7 @@ function agent(p)
   p.massEaten = 0
   p.points = 0
   p.sellected = false
+  p.celldata = {}
 
   foreman.push({func = "init", id = p.id, p.cellImage:getData(), p.seed})
 
@@ -54,6 +55,7 @@ function agent(p)
   end
 
   function p.update(dt)
+    if paused then return end
     if p.body and not p.body:isDestroyed() then
       p.age = p.age + dt
 
@@ -66,8 +68,6 @@ function agent(p)
   end
 
   function p.cultureUpdate(cellCount, massEaten, massX, massY, forwardForce)
-
-
       p.mass = math.max(cellCount or 1, 1)
       p.massEaten = massEaten or 0
       p.points = p.massEaten / math.max(p.age, 3)
@@ -137,6 +137,14 @@ function agent(p)
         simulation.agents[_] = nil
       end
     end
+  end
+
+  function p.updateCellCount(stem, brain, plast, mover)
+    p.celldata['numcells'] = (stem + brain + plast + mover)
+    p.celldata['stem'] = stem
+    p.celldata['brain'] = brain
+    p.celldata['plast'] = plast
+    p.celldata['mover'] = mover
   end
 
   return p

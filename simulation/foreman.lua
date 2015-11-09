@@ -20,10 +20,12 @@ hook(love, "load", function()
 end)
 
 hook(love, "update", function(dt)
+
   local rad = math.max(love.graphics.getDimensions())
 
   -- Push updates
   for _, worker in pairs(workers) do
+    if paused then break end
     worker.input:push({func = "update", dt})
   end
 

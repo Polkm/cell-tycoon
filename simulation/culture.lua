@@ -167,5 +167,26 @@ function culture(p, worker, id)
     worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, p.forwardForce})
   end
 
+  function p.evaluate()
+    -- gets us a breakdown of how this cell is structured
+    local stem = 0
+    local brain = 0
+    local plast = 0
+    local mover = 0
+    for _, c in pairs(cells) do
+      if c.type == "stem" then
+        stem = stem + 1
+      elseif c.type == "brain" then
+        brain = brain + 1
+      elseif c.type == "plast" then
+        plast = plast + 1
+      elseif c.type == "mover" then
+        mover = mover + 1
+      end
+    end
+    worker.outputChannel:push({func = "updateCellCount", id = id, stem, brain, plast, mover})
+  end
+
+
   return p
 end
