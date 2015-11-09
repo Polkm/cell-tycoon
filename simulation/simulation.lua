@@ -38,7 +38,17 @@ hook(love, "update", function(dt)
   local n = math.pow(7, 2)
   if (not lastSpawn or lastSpawn + 0 < love.timer.getTime()) and agentCount < n then
     lastSpawn = love.timer.getTime()
-    agent({}).setXYZ(math.randomDiscXY(0, 0, simulation.size * 0.9 - simulation.agentSize))
+    local x, y
+    repeat
+      x, y = math.randomDiscXY(0, 0, simulation.size * 0.9 - simulation.agentSize)
+      for _, agent in pairs(simulation.agents) do
+        if dist(x, y, agent.getXYZ()) < simulation.agentSize then
+          x, y = nil, nil
+          break
+        end
+      end
+    until x and y
+    agent({}).setXYZ(x, y)
   end
 
   world:update(dt)

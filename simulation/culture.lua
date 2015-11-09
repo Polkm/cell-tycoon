@@ -5,7 +5,9 @@ function culture(p, worker, id)
   local typeMap = {}
   local maxSize = 64
   p.maxSize = maxSize
+  local maxAngles = 256
   p.id = id
+  p.forwardForce = 0
 
   function p.init(imageData, seed, id)
     p.startTime = love.timer.getTime()
@@ -24,9 +26,9 @@ function culture(p, worker, id)
     math.random()
     math.random()
 
-    p.setCell(p.maxSize * 0.5, p.maxSize * 0.5, cell({type = "brain", energy = 10}))
-    p.setTypeRange(0, 10, "brain")
-    for i = 1, math.random(1, 3) do
+    p.setCell(p.maxSize * 0.5, p.maxSize * 0.5, cell({type = "brain", energy = 1}, p))
+    p.setTypeRange(0, 1, "brain")
+    for i = 1, math.random(1, 5) do
       p.setRandomTypeRange("plast")
     end
   end
@@ -73,28 +75,14 @@ function culture(p, worker, id)
 
   local octaves, amplitude, gain, frequency, lacunarity = 2, 1, 0.8, 0.05, 2
 
-  local function cull(x, y)
-    local s = 1
-    local r = math.simplexNoise(math.abs(x - maxSize * 0.5) / s, (y - maxSize * 0.5) / s, octaves, amplitude, gain, frequency, lacunarity, p.seed)
-    local fx, fy = x - maxSize * 0.5, y - maxSize * 0.5
-    local dist = math.floor(math.sqrt(fx * fx + fy * fy))
-    local v = getCell(x, y)
-    if v and v.age > 2 and v.energy <= 0 then return true end
-    return p.cellCount > 4 and dist > 0 and (r < -0.2 + (dist / (maxSize * 0.5)) or dist > math.ceil(maxSize * 0.5))
-  end
-
-  local function growthLimit(x, y, nx, ny, age)
-    return not getCell(nx, ny) and not cull(nx, ny)
-  end
-
   function p.setTypeRange(low, high, type)
     for i = low, high do
       typeMap[i] = type
     end
   end
   function p.setRandomTypeRange(type)
-    local low = math.random(11, 64)
-    local high = math.random(low + 1, low + 64)
+    local low = math.random(0, maxSize * maxSize * 0.1)
+    local high = math.random(low + 1, low + maxSize * maxSize * 0.1)
     p.setTypeRange(low, high, type)
   end
 
@@ -104,8 +92,8 @@ function culture(p, worker, id)
       for yy = -r, r do
         if math.sqrt(xx * xx + yy * yy) < r then
           local rx, ry = clamp(x + xx, 0, p.maxSize - 1), clamp(y + yy, 0, p.maxSize - 1)
-          if p.getCell(rx, ry) then
-            p.setCell(rx, ry, nil)
+          if getCell(rx, ry) then
+            setCell(rx, ry, nil)
             removedMass = removedMass + 1
             p.cellCount = p.cellCount - 1
             p.massX, p.massY = p.massX - (rx - p.maxSize * 0.5), p.massY - (ry - p.maxSize * 0.5)
@@ -123,27 +111,15 @@ function culture(p, worker, id)
   function p.update(dt)
     local time = love.timer.getTime()
 
-    local forwardForce = 0
+    p.forwardForce = 0
 
     local count = 0
     for i, v in pairs(cells) do
       count = count + 1
       local age = v.age
-      local x, y = i % maxSize, math.floor(i / maxSize)
-      x, y = math.floor(x), math.floor(y)
+      local x, y = math.floor(i % maxSize), math.floor(i / maxSize)
 
-      -- Cost of life
-      v.energy = math.max(v.energy - 1 * dt, 0)
-      v.age = v.age + dt
-
-      -- Photosynthesis
-      if v.type == "plast" then
-        v.energy = math.min(v.energy + 10 * dt, 1)
-      end
-
-      if v.type == "stem" and v.energy >= 0.5 then
-        forwardForce = forwardForce + 100 * dt
-      end
+      v.metabolize(dt)
 
       local gx, gy = growthDirection(x, y)
       if v.energy > 0 then
@@ -156,19 +132,20 @@ function culture(p, worker, id)
       end
 
       -- if age > 0.1 and age < lifetime then
-      if v.energy > 0.5 and growthLimit(x, y, gx, gy, v.age) then
+      if v.energy > 0.1 and not getCell(gx, gy) then
         -- setCell(x, y, {["time"] = time})
-        local type = "stem"
+        local type = "mover"
         if typeMap[p.cellCount] then
           type = typeMap[p.cellCount]
         end
-        setCell(gx, gy, cell({type = type}))
+        setCell(gx, gy, cell({type = type}, p))
         p.cellCount = p.cellCount + 1
         p.massX, p.massY = p.massX + (gx - maxSize * 0.5), p.massY + (gy - maxSize * 0.5)
-      end
-      -- end
 
-      if cull(x, y) then
+        v.energy = v.energy * 0.9
+      end
+
+      if not v.alive then
         setCell(x, y, nil)
         p.cellCount = p.cellCount - 1
         p.massX, p.massY = p.massX - (x - maxSize * 0.5), p.massY - (y - maxSize * 0.5)
@@ -187,7 +164,7 @@ function culture(p, worker, id)
       avgX, avgY = avgX / count, avgY / count
     end
 
-    worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, forwardForce})
+    worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, p.forwardForce})
   end
 
   return p
