@@ -27,10 +27,7 @@ function culture(p, worker, id)
     math.random()
 
     p.setCell(p.maxSize * 0.5, p.maxSize * 0.5, cell({type = "brain", energy = 1}, p))
-    p.setTypeRange(0, 1, "brain")
-    for i = 1, math.random(1, 5) do
-      p.setRandomTypeRange("plast")
-    end
+    p.setRandomTypeMap()
   end
 
   function p.remove()
@@ -55,8 +52,9 @@ function culture(p, worker, id)
         local v = getCell(x, y)
         if v then
           local d = 1 - v.energy
-          local ra, ga, ba, rb, gb, bb = v.getColors()
-          local r, g, b = clamp(lerp(ra, rb, d), 0, 255), clamp(lerp(ga, gb, d), 0, 255), clamp(lerp(ba, bb, d), 0, 255)
+          local aliveCol, deadCol = v.getColors()
+          local r, g, b = lerp3t(aliveCol, deadCol, d)
+          -- local r, g, b = clamp(lerp(aliveCol.r, rb, d), 0, 255), clamp(lerp(ga, gb, d), 0, 255), clamp(lerp(ba, bb, d), 0, 255)
           return r, g, b, 150
         end
         return 0, 0, 0, 0
@@ -75,15 +73,37 @@ function culture(p, worker, id)
 
   local octaves, amplitude, gain, frequency, lacunarity = 2, 1, 0.8, 0.05, 2
 
-  function p.setTypeRange(low, high, type)
-    for i = low, high do
-      typeMap[i] = type
-    end
+  local xResolution, yResolution = 100, 10
+  local function setTypeMap(x, y, v)
+    typeMap[math.floor(x) + math.floor(y) * xResolution] = v
   end
-  function p.setRandomTypeRange(type)
-    local low = math.random(0, maxSize * maxSize * 0.1)
-    local high = math.random(low + 1, low + maxSize * maxSize * 0.1)
-    p.setTypeRange(low, high, type)
+  local function getTypeMap(x, y)
+    return typeMap[math.floor(x) + math.floor(y) * xResolution]
+  end
+  local function setTypePol(theta, radius, v)
+    setTypeMap(theta / math.tau * xResolution, radius, v)
+  end
+  local function getTypePol(theta, radius)
+    return getTypeMap(theta / math.tau * xResolution, radius)
+  end
+  local function getTypeXY(wx, wy)
+    local ox, oy = wx - maxSize * 0.5, wy - maxSize * 0.5
+    return getTypePol(math.atan2(ox, oy) + math.pi, math.sqrt(ox * ox + oy * oy))
+  end
+
+
+  function p.setRandomTypeMap()
+    for x = 0, xResolution do
+      for y = 0, 1 do
+        setTypeMap(x, y, "brain")
+      end
+    end
+
+    for x = 0, xResolution do
+      for y = 2, 3 do
+        setTypeMap(x, y, "plast")
+      end
+    end
   end
 
   function p.bite(bitterid, x, y, r)
@@ -132,24 +152,28 @@ function culture(p, worker, id)
       end
 
       -- if age > 0.1 and age < lifetime then
-      if v.energy > 0.1 and not getCell(gx, gy) then
+      if (p.cellCount < 5 or v.energy > 0.5) and not getCell(gx, gy) then
         -- setCell(x, y, {["time"] = time})
         local type = "mover"
-        if typeMap[p.cellCount] then
-          type = typeMap[p.cellCount]
+        if getTypeXY(x, y) then
+          type = getTypeXY(x, y)
+        else
+          -- local ox, oy = x - maxSize * 0.5, y - maxSize * 0.5
+          -- local t, r = math.atan2(ox, oy) + math.pi, math.sqrt(ox * ox + oy * oy)
+          -- assert(false, x .. " " .. y .. " " .. t .. " " .. r)
         end
         setCell(gx, gy, cell({type = type}, p))
         p.cellCount = p.cellCount + 1
         p.massX, p.massY = p.massX + (gx - maxSize * 0.5), p.massY + (gy - maxSize * 0.5)
 
-        v.energy = v.energy * 0.9
+        v.energy = v.energy * 0.5
       end
 
-      if not v.alive then
-        setCell(x, y, nil)
-        p.cellCount = p.cellCount - 1
-        p.massX, p.massY = p.massX - (x - maxSize * 0.5), p.massY - (y - maxSize * 0.5)
-      end
+      -- if not v.alive then
+      --   setCell(x, y, nil)
+      --   p.cellCount = p.cellCount - 1
+      --   p.massX, p.massY = p.massX - (x - maxSize * 0.5), p.massY - (y - maxSize * 0.5)
+      -- end
     end
 
     renderCells()

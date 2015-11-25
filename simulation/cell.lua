@@ -7,14 +7,15 @@ function cell(p, culture)
   function p.getColors()
     local type = p.type
     if type == "stem" then
-      return 255, 68, 114, 68, 52, 101
+      return {255, 68, 114}, {68, 52, 101}
     elseif type == "brain" then
-      return 77, 213, 145, 93, 153, 111
+      return {77, 213, 145}, {93, 153, 111}
     elseif type == "plast" then
-      return 132, 219, 44, 50, 128, 50
+      return {132, 219, 44}, {50, 128, 50}
     elseif type == "mover" then
-      return 113, 54, 246, 71, 105, 159
+      return {113, 54, 246}, {71, 105, 159}
     end
+    return {255, 255, 255}, {255, 255, 255}
   end
 
   function p.metabolize(dt)
@@ -23,7 +24,7 @@ function cell(p, culture)
 
     -- Photosynthesis
     if p.type == "plast" then
-      p.energy = math.min(p.energy + 1000 * dt, 1)
+      p.energy = math.min(p.energy + 5 * dt, 1)
     end
 
     -- Pushing

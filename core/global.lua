@@ -26,8 +26,10 @@ function time() return love.timer.getTime() end
 function delta() return love.timer.getDelta() end
 
 function clamp(v, l, h) return math.min(math.max(v, l), h) end
+
 function lerp(a, b, d) return a + (b - a) * clamp(d, 0, 1) end
-function lerp3(ax, ay, az, bx, by, bz, d) return lerp(a, b, d), lerp(a, b, d), lerp(a, b, d) end
+function lerp3(ax, ay, az, bx, by, bz, d) return lerp(ax, bx, d), lerp(ay, by, d), lerp(az, bz, d) end
+function lerp3t(a, b, d) return lerp3(a[1], a[2], a[3], b[1], b[2], b[3], d) end
 
 function dist(ax, ay, bx, by) local dx, dy = bx - ax, by - ay return math.sqrt(dx * dx + dy * dy) end
 

@@ -20,7 +20,6 @@ hook(love, "load", function()
 end)
 
 hook(love, "update", function(dt)
-
   local rad = math.max(love.graphics.getDimensions())
 
   -- Push updates

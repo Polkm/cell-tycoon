@@ -1,8 +1,8 @@
 function agent(p)
   p.maxSize = 64
   p.seed = math.random() * 5436436
-  simulation.agents[#simulation.agents + 1] = p
-  p.id = #simulation.agents
+  p.id = math.random(0, 432905239867584)
+  simulation.agents[p.id] = p
   p.x, p.y, p.z = 0, 0, 0
   p.rot = 0
   p.cellImage = love.graphics.newImage(love.image.newImageData(p.maxSize, p.maxSize))
