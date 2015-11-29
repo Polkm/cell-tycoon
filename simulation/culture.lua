@@ -8,7 +8,7 @@ function culture(p, worker, id)
   local maxAngles = 256
   p.id = id
   p.forwardForce = 0
-
+    
   function p.init(imageData, seed, id)
     p.startTime = love.timer.getTime()
     p.lifetime = 1
