@@ -26,7 +26,7 @@ function physics.circle(x, y, w, h, type)
   local fixture
   local function reshape(px, py, r)
     if fixture and not fixture:isDestroyed() then fixture:destroy() end
-    local shape = love.physics.newCircleShape(clamp(px, -100, 100), clamp(py, -100, 100), math.min(math.max(r, 2), 100))
+    local shape = love.physics.newCircleShape(clamp(px, -100, 100), clamp(py, -100, 100), math.min(math.max(r, 1.0), 100))
     fixture = love.physics.newFixture(body, shape)
     fixture:setCategory(1)
     fixture:setFriction(0)

@@ -7,7 +7,7 @@ function agent(p)
   p.rot = 0
   p.cellImage = love.graphics.newImage(love.image.newImageData(p.maxSize, p.maxSize))
 
-  local reshape, newBody, fixture, shape = physics.circle(x, y, 1, 1, "dynamic")
+  local reshape, newBody, fixture, shape = physics.circle(x, y, 0.5, 0.5, "dynamic")
   newBody:setUserData(p)
   newBody:setLinearDamping(5)
   newBody:setBullet(true)
@@ -23,6 +23,11 @@ function agent(p)
   p.points = 0
   p.sellected = false
   p.celldata = {}
+
+  p.maxStrain = 50
+  p.strain = math.random(0,p.maxStrain)
+  p.tolerance = 10
+  p.maxage = 25
 
   foreman.push({func = "init", id = p.id, p.cellImage:getData(), p.seed})
 
@@ -47,11 +52,34 @@ function agent(p)
     local an = math.atan2(dy, dx) - p.body:getAngle() - math.pi
     local rad = math.sqrt(dx * dx + dy * dy)
     p.body:setUserData(p)
-    foreman.push({func = "bite", id = p.id, biter ~= nil and biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
+    if (math.abs(p.strain - biter.strain) > p.tolerance) then
+      foreman.push({func = "bite", id = p.id, biter ~= nil and biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
+    end
   end
 
   function p.feed(cellMass)
     foreman.push({func = "feed", id = p.id, cellMass})
+  end
+
+  local function mutate(chance, def, range)
+
+    if math.random(0,chance) == 0 then
+      return def + math.random() * 2 * range + -range
+    end
+    return def
+  end
+
+  function p.reproduce()
+    local children = 1
+
+    for i = 0, children do
+      local x,y = p.x + math.random() * 2 + -1, p.y + math.random() * 2 + -1
+      local child = agent({})
+      child.setXYZ(x,y,0)
+      child.strain = mutate(8, p.strain, p.maxStrain)
+      child.maxStrain = mutate(16, p.maxStrain, p.maxStrain)
+      child.tolerance = mutate(p.massEaten, p.tolerance, p.tolerance)
+    end
   end
 
   function p.update(dt)
@@ -61,7 +89,11 @@ function agent(p)
 
       p.x, p.y = p.body:getPosition()
       p.rot = p.body:getAngle()
-
+      if (p.age > p.maxage) then
+        if (math.random(0,1000) == 1) then
+          p.reproduce()
+        end
+      end
       -- Kill yourself if you suck ass at growing or are ded already
       if p.age > 0.5 and p.mass <= 1 then p.remove() return end
     end
@@ -74,7 +106,7 @@ function agent(p)
 
       massX, massY = massX - p.maxSize * 0.5, massY - p.maxSize * 0.5
 
-      fixture, shape = reshape(massX, massY, math.max(math.sqrt(p.mass) * 0.8, 1))
+      fixture, shape = reshape(massX, massY, math.max(math.sqrt(p.mass) * 0.7, 1))
       p.body:setBullet(true)
 
       local velX, velY = p.body:getLinearVelocity()

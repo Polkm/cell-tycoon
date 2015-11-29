@@ -1,8 +1,8 @@
 simulation = {}
 simulation.agents = {}
 simulation.sortedAgents = {}
-simulation.size = 400
-simulation.agentSize = 64
+simulation.size = 50
+simulation.agentSize = 16
 
 require("simulation/camera")
 require("simulation/physics")
@@ -15,7 +15,7 @@ require("simulation/foreman")
 require("simulation/tracking")
 require("simulation/disposable/panel")
 
-math.randomseed(os.time())
+math.randomseed(5000)
 math.random()
 math.random()
 math.random()
@@ -29,28 +29,38 @@ hook(love, "load", function()
     end
     love.physics.newFixture(love.physics.newBody(world, x, y, type or "static"), love.physics.newChainShape(true, points)):getBody()
   end
+
+  local pos = {}
+  local count = 0
+  while count < simulation.agentSize do
+
+  local x,y = math.randomDiscXY(0, 0, simulation.size * 0.9)
+  local canAdd = true
+  for _,coord in pairs(pos) do
+    if dist(coord[1], coord[2], x, y) < 0.01 then
+      canAdd = false
+    end
+  end
+  if canAdd then
+    pos[count] = {x,y}
+    count = count + 1
+  end
+
+  end
+
+
+  local i = 0
+  for _,coord in pairs(pos) do
+    local x, y = coord[1], coord[2]
+    agent({}).setXYZ(x,y,0)
+    i = i + 1
+  end
+
+
 end)
 
 local lastSpawn
 hook(love, "update", function(dt)
-  local agentCount = 0
-  for _, agent in pairs(simulation.agents) do agentCount = agentCount + 1 end
-  local n = math.pow(7, 2)
-  if (not lastSpawn or lastSpawn + 0 < love.timer.getTime()) and agentCount < n then
-    lastSpawn = love.timer.getTime()
-    local x, y
-    repeat
-      x, y = math.randomDiscXY(0, 0, simulation.size * 0.9 - simulation.agentSize)
-      for _, agent in pairs(simulation.agents) do
-        if dist(x, y, agent.getXYZ()) < simulation.agentSize then
-          x, y = nil, nil
-          break
-        end
-      end
-    until x and y
-    agent({}).setXYZ(x, y)
-  end
-
   world:update(dt)
 
   for _, agent in pairs(simulation.agents) do
