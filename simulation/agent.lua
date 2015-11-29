@@ -67,7 +67,7 @@ function agent(p)
     end
   end
 
-  function p.cultureUpdate(cellCount, massEaten, massX, massY, forwardForce)
+  function p.cultureUpdate(cellCount, massEaten, massX, massY, forwardForce, angleForce)
       p.mass = math.max(cellCount or 1, 1)
       p.massEaten = massEaten or 0
       p.points = p.massEaten / math.max(p.age, 3)
@@ -76,8 +76,13 @@ function agent(p)
 
       fixture, shape = reshape(massX, massY, math.max(math.sqrt(p.mass) * 0.8, 1))
       p.body:setBullet(true)
+
+      local velX, velY = p.body:getLinearVelocity()
       local angle = p.body:getAngle() - math.pi * 0.5
-      p.body:applyForce(math.cos(angle) * forwardForce, math.sin(angle) * forwardForce)
+      local tarX, tarY = math.cos(angle) * forwardForce, math.sin(angle) * forwardForce
+      local mass = p.body:getMass()
+      p.body:applyLinearImpulse(mass * (tarX - velX), mass * (tarY - velY))
+      p.body:applyAngularImpulse(mass * angleForce)
     end
 
   function p.postSolve(b, coll, normalimpulse1, tangentimpulse1, normalimpulse2, tangentimpulse2)

@@ -6,7 +6,10 @@ p.inputChannel, p.outputChannel = ...
 p.cultures = {}
 
 function p.update(dt)
-  for _, cult in pairs(p.cultures) do cult.update(dt) end
+  dt = love.timer.getDelta()
+  for _, cult in pairs(p.cultures) do
+    cult.update(dt)
+  end
 end
 
 local alive = true

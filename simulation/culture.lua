@@ -8,6 +8,8 @@ function culture(p, worker, id)
   local maxAngles = 256
   p.id = id
   p.forwardForce = 0
+  p.angleForce = 0
+  p.symmetry = 2
 
   function p.init(imageData, seed, id)
     p.startTime = love.timer.getTime()
@@ -73,37 +75,58 @@ function culture(p, worker, id)
 
   local octaves, amplitude, gain, frequency, lacunarity = 2, 1, 0.8, 0.05, 2
 
-  local xResolution, yResolution = 100, 10
+  local xResolution, yResolution = 10, 10
   local function setTypeMap(x, y, v)
     typeMap[math.floor(x) + math.floor(y) * xResolution] = v
   end
   local function getTypeMap(x, y)
-    return typeMap[math.floor(x) + math.floor(y) * xResolution]
+    -- return typeMap[math.floor(x) + math.floor(y) * xResolution]
+    return typeMap[math.abs(math.floor(x % xResolution) - xResolution * 0.5) + math.floor(y) * xResolution]
+    -- return typeMap[math.floor(x) % math.floor(xResolution / p.symmetry) + math.floor(y) * xResolution]
   end
   local function setTypePol(theta, radius, v)
-    setTypeMap(theta / math.tau * xResolution, radius, v)
+    setTypeMap((theta / math.tau * xResolution), radius, v)
   end
   local function getTypePol(theta, radius)
-    return getTypeMap(theta / math.tau * xResolution, radius)
+    return getTypeMap((theta / math.tau * xResolution), radius)
   end
-  local function getTypeXY(wx, wy)
+  local function getTypeXY(wx, wy, radSym)
     local ox, oy = wx - maxSize * 0.5, wy - maxSize * 0.5
-    return getTypePol(math.atan2(ox, oy) + math.pi, math.sqrt(ox * ox + oy * oy))
+    return getTypePol((math.atan2(ox, oy) + math.pi) % (math.tau / 1), math.sqrt(ox * ox + oy * oy))
   end
 
 
   function p.setRandomTypeMap()
-    for x = 0, xResolution do
+    for x = 0, xResolution - 1 do
       for y = 0, 1 do
         setTypeMap(x, y, "brain")
       end
     end
 
-    for x = 0, xResolution do
-      for y = 2, 3 do
-        setTypeMap(x, y, "plast")
-      end
+    for i = 1, 25 do
+      local pie = math.tau / p.symmetry
+      local buffer = 0.1
+      local xx = math.random(0, xResolution - 1)
+      setTypeMap(math.random(0, xResolution - 1), math.random(0, 20), "plast")
+      -- setTypePol(math.randomf(0, math.tau), math.random() * 10, "plast")
+      -- setTypePol(math.randomf(pie + buffer, pie - buffer * 2), math.random() * 10, "plast")
     end
+
+    -- for theta = 0, math.tau, math.tau / xResolution do
+    --   for radius = 2, 10 do
+    --     if math.random() < 0.1 then
+    --       setTypePol(theta, math.sqrt(math.random()) * , "plast")
+    --     end
+    --   end
+    -- end
+    -- --
+    -- local cellTypes = {"mover", "plast"}
+    -- for x = 0, xResolution do
+    --   for y = 2, 10 do
+    --     local _, pick = table.random(cellTypes)
+    --     setTypeMap(x, y, pick)
+    --   end
+    -- end
   end
 
   function p.bite(bitterid, x, y, r)
@@ -151,22 +174,18 @@ function culture(p, worker, id)
         end
       end
 
-      -- if age > 0.1 and age < lifetime then
-      if (p.cellCount < 5 or v.energy > 0.5) and not getCell(gx, gy) then
-        -- setCell(x, y, {["time"] = time})
+      if (p.cellCount < 20 or v.energy > 0.5) and not getCell(gx, gy) then
+        if p.cellCount >= 5 then
+          v.energy = v.energy * 0.5
+        end
+
         local type = "mover"
-        if getTypeXY(x, y) then
-          type = getTypeXY(x, y)
-        else
-          -- local ox, oy = x - maxSize * 0.5, y - maxSize * 0.5
-          -- local t, r = math.atan2(ox, oy) + math.pi, math.sqrt(ox * ox + oy * oy)
-          -- assert(false, x .. " " .. y .. " " .. t .. " " .. r)
+        if getTypeXY(x, y, 4) then
+          type = getTypeXY(x, y, 3)
         end
         setCell(gx, gy, cell({type = type}, p))
         p.cellCount = p.cellCount + 1
         p.massX, p.massY = p.massX + (gx - maxSize * 0.5), p.massY + (gy - maxSize * 0.5)
-
-        v.energy = v.energy * 0.5
       end
 
       -- if not v.alive then
@@ -188,7 +207,7 @@ function culture(p, worker, id)
       avgX, avgY = avgX / count, avgY / count
     end
 
-    worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, p.forwardForce})
+    worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, p.forwardForce, p.angleForce})
   end
 
   function p.evaluate()

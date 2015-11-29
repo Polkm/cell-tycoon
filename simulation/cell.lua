@@ -24,12 +24,13 @@ function cell(p, culture)
 
     -- Photosynthesis
     if p.type == "plast" then
-      p.energy = math.min(p.energy + 5 * dt, 1)
+      p.energy = math.min(p.energy + 200 * dt, 1)
     end
 
     -- Pushing
-    if p.type == "mover" and p.energy >= 0.5 then
-      culture.forwardForce = culture.forwardForce + 100 * dt
+    if p.type == "mover" and p.energy > 0.5 then
+      culture.forwardForce = culture.forwardForce + 20 * dt
+      culture.angleForce = math.cos(p.age) * 100
     end
 
     if p.age > 0.8 then
