@@ -91,7 +91,6 @@ function culture(p, worker, id)
     return getTypePol(math.atan2(ox, oy) + math.pi, math.sqrt(ox * ox + oy * oy))
   end
 
-
   function p.setRandomTypeMap()
     for x = 0, xResolution do
       for y = 0, 1 do
@@ -125,7 +124,7 @@ function culture(p, worker, id)
   end
 
   function p.feed(id, mass)
-    -- println("fed")
+     --println("fed")
   end
 
   function p.update(dt)

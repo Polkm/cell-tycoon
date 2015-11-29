@@ -25,6 +25,7 @@ function cell(p, culture)
     -- Photosynthesis
     if p.type == "plast" then
       p.energy = math.min(p.energy + 5 * dt, 1)
+      p.alive = false
     end
 
     -- Pushing

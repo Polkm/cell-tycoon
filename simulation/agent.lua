@@ -7,7 +7,7 @@ function agent(p)
   p.rot = 0
   p.cellImage = love.graphics.newImage(love.image.newImageData(p.maxSize, p.maxSize))
 
-  local reshape, newBody, fixture, shape = physics.circle(x, y, 1, 1, "dynamic")
+  local reshape, newBody, fixture, shape = physics.circle(x, y, 0.5, 0.5, "dynamic")
   newBody:setUserData(p)
   newBody:setLinearDamping(5)
   newBody:setBullet(true)
@@ -74,7 +74,7 @@ function agent(p)
 
       massX, massY = massX - p.maxSize * 0.5, massY - p.maxSize * 0.5
 
-      fixture, shape = reshape(massX, massY, math.max(math.sqrt(p.mass) * 0.8, 1))
+      fixture, shape = reshape(massX, massY, math.max(math.sqrt(p.mass) * 0.7, 1))
       p.body:setBullet(true)
       local angle = p.body:getAngle() - math.pi * 0.5
       p.body:applyForce(math.cos(angle) * forwardForce, math.sin(angle) * forwardForce)
