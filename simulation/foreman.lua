@@ -22,6 +22,8 @@ end)
 hook(love, "update", function(dt)
   local rad = math.max(love.graphics.getDimensions())
 
+  dt = clamp(dt, 0, 0.1)
+
   -- Push updates
   for _, worker in pairs(workers) do
     if paused then break end

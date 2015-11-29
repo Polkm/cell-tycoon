@@ -70,8 +70,6 @@ end
 
 -- Returns a random value from the table
 function table.random(tbl)
-  if type(tbl) ~= "table" then return end
-
   local count = table.count(tbl)
   if count <= 0 then return end
 
