@@ -4,7 +4,7 @@ local stats = gui.list({
   x = simulation.size + 16, y = -simulation.size,
   vertical = false,
   padding = 10,
-  list = {{text = "name"}, {text = "age"}, {text = "mass"}, {text = "points"}},
+  list = {{text = "name"}, {text = "age"}, {text = "mass"}, {text = "massEaten"}},
   child = function(tbl)
     return gui.column({
       text = tbl.text,

@@ -8,7 +8,9 @@ function culture(p, worker, id)
   local maxAngles = 256
   p.id = id
   p.forwardForce = 0
-    
+  p.decaying = false
+  p.decayAmount = 100
+
   function p.init(imageData, seed, id)
     p.startTime = love.timer.getTime()
     p.lifetime = 1
@@ -188,6 +190,23 @@ function culture(p, worker, id)
     end
 
     worker.outputChannel:push({func = "cultureUpdate", id = id, p.cellCount, p.massEaten, avgX, avgY, p.forwardForce})
+  end
+
+  function p.decay()
+    local exhausted = true
+    for i, v in pairs(cells) do
+      if (v.type == "plast") then
+        if math.random(0,2) == 0 then
+          cells[i] = nil
+          exhausted = false
+        else
+          cells[i].type = "mover"
+        end
+      end
+    end
+    if (exhausted) then
+      worker.outputChannel:push({func = "exhaust", id = id})
+    end
   end
 
   function p.evaluate()
