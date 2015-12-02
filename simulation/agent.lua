@@ -28,7 +28,7 @@ function agent(p)
   p.maxStrain = 50000
   p.strain = math.random(0,p.maxStrain)
   p.tolerance = 10000
-  p.stableAge = 25
+  p.stableAge = 1
   p.active = true
 
   foreman.push({func = "init", id = p.id, p.cellImage:getData(), p.seed})
@@ -82,7 +82,7 @@ function agent(p)
       child.maxStrain = mutate(16, p.maxStrain, 0, p.maxStrain)
 
       child.tolerance = math.max(p.tolerance - p.massEaten + mutate(p.massEaten, 0, 0, p.maxStrain/100),0)
-
+      child.setTypeMap(p.getTypeMap)
       if (true) then
         foreman.push({func = "decay", id = p.id})
       end
