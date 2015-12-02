@@ -78,11 +78,7 @@ function cell(p, cult)
         cult.cellCount = cult.cellCount + 1
         cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
       end
-      if (not cult.exhausted or type ~= "plast") then
-        cult.setCell(gx, gy, cell({type = type}, cult))
-        cult.cellCount = cult.cellCount + 1
-        cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
-      end
+
     end
 
     -- Decaying
