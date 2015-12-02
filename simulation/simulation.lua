@@ -1,8 +1,9 @@
 simulation = {}
 simulation.agents = {}
 simulation.sortedAgents = {}
-simulation.size = 500
-simulation.populationSize = 130
+simulation.size = 200
+simulation.populationSize = 100
+
 
 require("simulation/camera")
 require("simulation/physics")
@@ -15,7 +16,7 @@ require("simulation/foreman")
 require("simulation/tracking")
 require("simulation/disposable/panel")
 
-math.randomseed(5000)
+math.randomseed(os.time())
 math.random()
 math.random()
 math.random()

@@ -64,7 +64,7 @@ function agent(p)
 
   function p.feed(cellMass)
     p.massEaten = p.massEaten + cellMass
-    foreman.push({func = "feed", id = p.id, cellMass})
+    -- foreman.push({func = "feed", id = p.id, cellMass})
   end
 
   local function mutate(chance, def, minrange, maxrange)
