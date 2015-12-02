@@ -13,7 +13,7 @@ function cell(p, cult)
     if type == "stem" then
       return {255, 68, 114}, {68, 52, 101}
     elseif type == "brain" then
-      return {255, 0, 0}, {255, 0, 0}
+      return {249, 22, 213}, {214, 86, 241}
     elseif type == "plast" then
       return {132, 219, 44}, {50, 128, 50}
     elseif type == "mover" then
@@ -37,25 +37,33 @@ function cell(p, cult)
     end
   end
 
+  function p.maxEnergy()
+    if type == "fat" then
+      return 100
+    else
+      return 1
+    end
+  end
+
+  function p.addEnergy(amount)
+    p.energy = clamp(p.energy + amount, 0, p.maxEnergy())
+  end
+
   function p.metabolize(dt, x, y)
     p.age = p.age + dt
-    p.energy = math.max(p.energy - 0 * dt, 0)
+
+    -- Cost of life
+    p.addEnergy(-0.02 * dt)
 
     -- Photosynthesis
     if p.type == "plast" then
-      p.energy = math.min(p.energy + 20 * dt, 1)
+      p.addEnergy(20 * dt)
     end
 
     -- Pushing
     if p.type == "mover" and p.energy > 0.1 then
       cult.forwardForce = cult.forwardForce + 200 * dt * p.energy
       -- cult.angleForce = math.cos(p.age) * 100
-    end
-
-    if p.age > 0.8 then
-      if p.energy <= 0.001 then
-        p.alive = false
-      end
     end
 
     -- Spread energy
@@ -70,9 +78,10 @@ function cell(p, cult)
     end
 
     -- Growing
-    if p.energy > 0.01 and not cult.getCell(gx, gy) then
+    local growCost = 0.01
+    if p.energy >= growCost and not cult.getCell(gx, gy) then
       if cult.cellCount >= 5 then
-        p.energy = p.energy * 0.5
+        p.addEnergy(-growCost)
       end
 
       local type = cult.getTypeMap(x, y)
@@ -83,6 +92,11 @@ function cell(p, cult)
           cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
         end
       end
+    end
+
+    -- Death
+    if p.age > 0.8 and p.energy <= 0.001 then
+      p.alive = false
     end
 
     -- Decaying

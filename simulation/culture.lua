@@ -139,8 +139,8 @@ function culture(p, worker, id)
     worker.outputChannel:push({func = "feed", id = bitterid, removedMass})
   end
 
-  function p.feed(id, mass)
-    assert(mass, mass)
+  function p.feed(mass)
+    -- assert(mass, mass)
     local fatCount = 0
     for _, cell in pairs(cells) do
       if cell.type == "fat" then fatCount = fatCount + 1 end
