@@ -28,10 +28,10 @@ function agent(p)
   p.maxStrain = 50000
   p.strain = math.random(0,p.maxStrain)
   p.tolerance = 10000
-  p.stableAge = 25
+  p.stableAge = 5
   p.active = true
 
-  foreman.push({func = "init", id = p.id, p.cellImage:getData(), p.seed})
+  foreman.push({func = "init", id = p.id, p.cellImage:getData()})
 
   -- local thread = love.thread.newThread("simulation/agent_thread.lua")
   -- local inputChannel = love.thread.newChannel()
