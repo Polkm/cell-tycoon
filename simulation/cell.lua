@@ -20,7 +20,10 @@ function cell(p, cult)
       return {113, 54, 246}, {71, 105, 159}
     elseif type == "fat" then
       return {255, 162, 0}, {137, 87, 0}
-
+    elseif type == "sense" then
+      return {239, 244, 25}, {224, 227, 77}
+    elseif type == "cancer" then
+      return {52, 27, 32}, {52, 27, 32}
     end
     return {255, 255, 255}, {255, 255, 255}
   end
@@ -67,21 +70,18 @@ function cell(p, cult)
     end
 
     -- Growing
-    if p.energy > 0.5 and not cult.getCell(gx, gy) then
+    if p.energy > 0.01 and not cult.getCell(gx, gy) then
       if cult.cellCount >= 5 then
         p.energy = p.energy * 0.5
       end
 
-      if cult.getTypeMap(x, y) then
-        local type = cult.getTypeMap(x, y)
-        cult.setCell(gx, gy, cell({type = type}, cult))
-        cult.cellCount = cult.cellCount + 1
-        cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
-      end
-      if (not cult.exhausted or type ~= "plast") then
-        cult.setCell(gx, gy, cell({type = type}, cult))
-        cult.cellCount = cult.cellCount + 1
-        cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
+      local type = cult.getTypeMap(x, y)
+      if type then
+        if type ~= "plast" or not cult.exhausted then
+          cult.setCell(gx, gy, cell({type = type}, cult))
+          cult.cellCount = cult.cellCount + 1
+          cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
+        end
       end
     end
 

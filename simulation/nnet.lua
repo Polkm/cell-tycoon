@@ -19,7 +19,7 @@ function nnet(p)
   end
 
   function p.forward(input)
-
+    
   end
 
   p.forward({sense1 = 0.5, sense2 = 0, sense3 = 0.2})
