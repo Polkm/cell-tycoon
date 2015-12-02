@@ -4,16 +4,23 @@ function cell(p, cult)
   p.energy = p.energy or 0.1
   p.alive = p.alive or true
 
+  if p.type == "fat" then
+    p.energy = cult.fatStartEnergy
+  end
+
   function p.getColors()
     local type = p.type
     if type == "stem" then
       return {255, 68, 114}, {68, 52, 101}
     elseif type == "brain" then
-      return {77, 213, 145}, {93, 153, 111}
+      return {255, 0, 0}, {255, 0, 0}
     elseif type == "plast" then
       return {132, 219, 44}, {50, 128, 50}
     elseif type == "mover" then
       return {113, 54, 246}, {71, 105, 159}
+    elseif type == "fat" then
+      return {255, 162, 0}, {137, 87, 0}
+
     end
     return {255, 255, 255}, {255, 255, 255}
   end
@@ -29,7 +36,7 @@ function cell(p, cult)
 
   function p.metabolize(dt, x, y)
     p.age = p.age + dt
-    p.energy = math.max(p.energy - 1 * dt, 0)
+    p.energy = math.max(p.energy - 0 * dt, 0)
 
     -- Photosynthesis
     if p.type == "plast" then
@@ -37,8 +44,8 @@ function cell(p, cult)
     end
 
     -- Pushing
-    if p.type == "mover" and p.energy > 0.5 then
-      cult.forwardForce = cult.forwardForce + 20 * dt
+    if p.type == "mover" and p.energy > 0.1 then
+      cult.forwardForce = cult.forwardForce + 200 * dt * p.energy
       -- cult.angleForce = math.cos(p.age) * 100
     end
 
@@ -65,13 +72,12 @@ function cell(p, cult)
         p.energy = p.energy * 0.5
       end
 
-      local type = "mover"
       if cult.getTypeMap(x, y) then
-        type = cult.getTypeMap(x, y)
+        local type = cult.getTypeMap(x, y)
+        cult.setCell(gx, gy, cell({type = type}, cult))
+        cult.cellCount = cult.cellCount + 1
+        cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
       end
-      cult.setCell(gx, gy, cell({type = type}, cult))
-      cult.cellCount = cult.cellCount + 1
-      cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
     end
 
     -- Decaying

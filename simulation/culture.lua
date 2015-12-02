@@ -16,6 +16,8 @@ function culture(p, worker, id)
   p.massEaten = 0
   p.massX, p.massY = 0, 0
 
+  p.fatStartEnergy = 1000
+
   function p.init(imageData, genome)
     p.startTime = love.timer.getTime()
     p.imageData = imageData
@@ -56,10 +58,21 @@ function culture(p, worker, id)
   p.getTypeMap = getTypeMap
 
   function p.setRandomTypeMap()
-    for i = 1, 400 do
-      local x = math.random(0, maxSize - 1)
-      local y = math.random(0, maxSize - 1)
-      setTypeMap(x, y, "plast")
+    local types = {"fat", "mover"}
+
+    setTypeMap(p.maxSize * 0.5, p.maxSize * 0.5, "brain")
+
+    for i = 1, math.randomn(100, 10) do
+      local i, randType = table.random(typeMap)
+      local x, y = i % maxSize + math.random(-1, 1), math.floor(i / maxSize) + math.random(-1, 1)
+      if not getTypeMap(x, y) then
+        local _, randType = table.random(types)
+        setTypeMap(x, y, randType)
+
+        if randType == "fat" then
+          p.fatStartEnergy = p.fatStartEnergy * 0.5
+        end
+      end
     end
   end
 
@@ -125,7 +138,16 @@ function culture(p, worker, id)
   end
 
   function p.feed(id, mass)
-
+    assert(mass, mass)
+    local fatCount = 0
+    for _, cell in pairs(cells) do
+      if cell.type == "fat" then fatCount = fatCount + 1 end
+    end
+    for _, cell in pairs(cells) do
+      if cell.type == "fat" then
+        cell.energy = cell.energy + mass / fatCount
+      end
+    end
   end
 
   function p.decay()
