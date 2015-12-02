@@ -57,14 +57,14 @@ function agent(p)
     local an = math.atan2(dy, dx) - p.body:getAngle() - math.pi
     local rad = math.sqrt(dx * dx + dy * dy)
     p.body:setUserData(p)
-    if ((not biter.active) or (p.active and math.abs(p.strain - biter.strain) > p.tolerance)) then
+    if not biter or ((not biter.active) or (p.active and math.abs(p.strain - biter.strain) > p.tolerance)) then
       foreman.push({func = "bite", id = p.id, biter ~= nil and biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
     end
   end
 
   function p.feed(cellMass)
     p.massEaten = p.massEaten + cellMass
-    -- foreman.push({func = "feed", id = p.id, cellMass})
+    foreman.push({func = "feed", id = p.id, cellMass})
   end
 
   local function mutate(chance, def, minrange, maxrange)
