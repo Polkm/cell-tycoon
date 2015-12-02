@@ -28,10 +28,13 @@ function agent(p)
   p.maxStrain = 50000
   p.strain = math.random(0,p.maxStrain)
   p.tolerance = 10000
-  p.stableAge = 1
+  p.stableAge = 5
+  p.rCost = 900
+  p.eRate = 6
+  p.rRate = 1000
   p.active = true
 
-  foreman.push({func = "init", id = p.id, p.cellImage:getData(), p.seed})
+  foreman.push({func = "init", id = p.id, p.cellImage:getData()})
 
   -- local thread = love.thread.newThread("simulation/agent_thread.lua")
   -- local inputChannel = love.thread.newChannel()
@@ -54,7 +57,7 @@ function agent(p)
     local an = math.atan2(dy, dx) - p.body:getAngle() - math.pi
     local rad = math.sqrt(dx * dx + dy * dy)
     p.body:setUserData(p)
-    if (p.active and math.abs(p.strain - biter.strain) > p.tolerance) then
+    if ((not biter.active) or (p.active and math.abs(p.strain - biter.strain) > p.tolerance)) then
       foreman.push({func = "bite", id = p.id, biter ~= nil and biter.id, math.cos(an) * rad + p.maxSize * 0.5, math.sin(an) * rad + p.maxSize * 0.5, r})
     end
   end
@@ -82,9 +85,9 @@ function agent(p)
       child.maxStrain = mutate(16, p.maxStrain, 0, p.maxStrain)
 
       child.tolerance = math.max(p.tolerance - p.massEaten + mutate(p.massEaten, 0, 0, p.maxStrain/100),0)
-      child.setTypeMap(p.getTypeMap)
+      foreman.push({func = "recieveTypeMap", id = child.id, p.maxSize})
       if (true) then
-        foreman.push({func = "decay", id = p.id})
+        foreman.push({func = "decay", id = p.id, p.rCost, p.eRate,})
       end
     end
   end
@@ -97,7 +100,7 @@ function agent(p)
       p.x, p.y = p.body:getPosition()
       p.rot = p.body:getAngle()
       if (p.active and p.age > p.stableAge) then
-        if (math.random(0,1000) == 1) then
+        if (p.active and math.random(0,p.rRate) == 1) then
           p.reproduce()
         end
       end
@@ -138,7 +141,7 @@ function agent(p)
 
   function p.exhaust()
     p.active = false
-    p.strain = -5000
+    p.strain = -50000
   end
 
   local ringAlpha = 0

@@ -2,7 +2,7 @@ simulation = {}
 simulation.agents = {}
 simulation.sortedAgents = {}
 simulation.size = 500
-simulation.agentSize = 64
+simulation.populationSize = 130
 
 require("simulation/camera")
 require("simulation/physics")
@@ -32,22 +32,20 @@ hook(love, "load", function()
 
   local pos = {}
   local count = 0
-  while count < simulation.agentSize do
-
-  local x,y = math.randomDiscXY(0, 0, simulation.size * 0.9)
-  local canAdd = true
-  for _,coord in pairs(pos) do
-    if dist(coord[1], coord[2], x, y) < 0.01 then
-      canAdd = false
+  while count < simulation.populationSize do
+    local x, y = math.randomDiscXY(0, 0, simulation.size * 0.9)
+    local notTooClose = true
+    for _, coord in pairs(pos) do
+      if dist(coord[1], coord[2], x, y) < 0.01 then
+        notTooClose = false
+        break
+      end
+    end
+    if notTooClose then
+      pos[count] = {x, y}
+      count = count + 1
     end
   end
-  if canAdd then
-    pos[count] = {x,y}
-    count = count + 1
-  end
-
-  end
-
 
   local i = 0
   for _,coord in pairs(pos) do
