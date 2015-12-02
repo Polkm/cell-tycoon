@@ -5,13 +5,12 @@ function culture(p, worker, id)
   local typeMap = {}
   local maxSize = 64
   p.maxSize = maxSize
-  local maxAngles = 256
+
   p.id = id
   p.forwardForce = 0
   p.angleForce = 0
   p.symmetry = 2
 
-  p.lifetime = 1
   p.cellCount = 0
   p.massEaten = 0
   p.massX, p.massY = 0, 0
@@ -29,6 +28,8 @@ function culture(p, worker, id)
     else
       p.setRandomTypeMap()
     end
+
+    worker.outputChannel:push({func = "updateTypeMap", id = id, encode(typeMap)})
   end
 
   function p.remove()

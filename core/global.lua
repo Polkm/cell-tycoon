@@ -66,5 +66,5 @@ function encode(tbl)
   return str .. "}"
 end
 function dencode(str)
-  -- TODO
+  return loadstring(str)
 end

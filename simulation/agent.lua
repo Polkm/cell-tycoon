@@ -32,6 +32,7 @@ function agent(p)
   p.rCost = 900
   p.eRate = 6
   p.rRate = 1000
+  p.mutateRate = 12
   p.active = true
 
   foreman.push({func = "init", id = p.id, p.cellImage:getData()})
@@ -85,7 +86,23 @@ function agent(p)
       child.maxStrain = mutate(16, p.maxStrain, 0, p.maxStrain)
 
       child.tolerance = math.max(p.tolerance - p.massEaten + mutate(p.massEaten, 0, 0, p.maxStrain/100),0)
-      foreman.push({func = "recieveTypeMap", id = child.id, p.maxSize})
+
+      local newTypeMap = {}
+      local types = {"fat", "mover", "plast", "none"}
+      for _, t in pairs(p.typeMap) do
+        if math.random(0,p.mutateRate) == 0 then
+          local _, randType = table.random(types)
+          if (randType == "none") then
+            newTypeMap[_] = nil
+          else
+            newTypeMap[_] = randType
+          end
+        else
+          newTypeMap[_] = t
+        end
+      end
+
+      foreman.push({func = "recieveTypeMap", id = child.id, p.maxSize, encode(newTypeMap)})
       if (true) then
         foreman.push({func = "decay", id = p.id, p.rCost, p.eRate,})
       end
@@ -189,6 +206,10 @@ function agent(p)
         simulation.agents[_] = nil
       end
     end
+  end
+
+  function p.updateTypeMap(typeMap)
+    p.typeMap = dencode("return " ..typeMap)()
   end
 
   function p.updateCellCount(stem, brain, plast, mover)
