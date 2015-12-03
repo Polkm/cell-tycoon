@@ -209,7 +209,7 @@ function agent(p)
   end
 
   function p.updateTypeMap(typeMap)
-    p.typeMap = dencode(typeMap)()
+    p.typeMap = dencode(typeMap)
   end
 
   function p.updateCellCount(stem, brain, plast, mover)

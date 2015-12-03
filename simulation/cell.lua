@@ -17,15 +17,22 @@ function cell(p, cult)
     elseif type == "plast" then
       return {132, 219, 44}, {50, 128, 50}
     elseif type == "mover" then
-      return {113, 54, 246}, {71, 105, 159}
+      return {27, 101, 255}, {68, 119, 162}
     elseif type == "fat" then
-      return {255, 162, 0}, {137, 87, 0}
+      return {255, 162, 0}, {151, 133, 73}
     elseif type == "sense" then
       return {239, 244, 25}, {224, 227, 77}
     elseif type == "cancer" then
       return {52, 27, 32}, {52, 27, 32}
     end
     return {255, 255, 255}, {255, 255, 255}
+  end
+
+  function p.getColor()
+    local d = 1 - (p.energy / p.maxEnergy())
+    local aliveCol, deadCol = p.getColors()
+    local r, g, b = lerp3t(aliveCol, deadCol, d)
+    return r, g, b, 255
   end
 
   local function randomDirection(x, y)

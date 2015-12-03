@@ -83,11 +83,7 @@ function culture(p, worker, id)
       p.imageData:mapPixel(function(x, y, r, g, b, a)
         local v = getCell(x, y)
         if v then
-          local d = 1 - v.energy
-          local aliveCol, deadCol = v.getColors()
-          local r, g, b = lerp3t(aliveCol, deadCol, d)
-          -- local r, g, b = clamp(lerp(aliveCol.r, rb, d), 0, 255), clamp(lerp(ga, gb, d), 0, 255), clamp(lerp(ba, bb, d), 0, 255)
-          return r, g, b, 150
+          return v.getColor()
         end
         return 0, 0, 0, 0
       end)
