@@ -3,7 +3,7 @@ function love.conf(t)
 	t.version = "0.9.1"                -- The LÃVE version this game was made for (string)
 	t.console = true                  -- Attach a console (boolean, Windows only)
 
-	t.window.title = "Spice is nice"        -- The window title (string)
+	t.window.title = "Cell Tycoon"        -- The window title (string)
 	t.window.icon = nil                -- Filepath to an image to use as the window's icon (string)
 	t.window.width = 1024               -- The window width (number)
 	t.window.height = 768              -- The window height (number)

@@ -56,21 +56,34 @@ function cell(p, cult)
     p.energy = clamp(p.energy + amount, 0, p.maxEnergy())
   end
 
+  function p.livingEnergyCost()
+    if p.type == "sense" then
+      return -0.05
+    elseif p.type == "brain" then
+      return -0.05
+    elseif p.type == "plast" then
+      return 1
+    end
+    return -0.02
+  end
+
+  local moveForce = 200
+
   function p.metabolize(dt, x, y)
     p.age = p.age + dt
 
     -- Cost of life
-    p.addEnergy(-0.02 * dt)
-
-    -- Photosynthesis
-    if p.type == "plast" then
-      p.addEnergy(20 * dt)
-    end
+    p.addEnergy(p.livingEnergyCost() * dt)
 
     -- Pushing
     if p.type == "mover" and p.energy > 0.1 then
-      cult.forwardForce = cult.forwardForce + 200 * dt * p.energy
+      cult.forwardForce = clamp(cult.forwardForce + moveForce * dt, 0, 1000)
       -- cult.angleForce = math.cos(p.age) * 100
+    end
+
+    -- Stopping
+    if p.type == "plast" then
+      cult.forwardForce = clamp(cult.forwardForce - moveForce * dt, 0, 1000)
     end
 
     -- Spread energy
@@ -85,19 +98,17 @@ function cell(p, cult)
     end
 
     -- Growing
-    local growCost = 0.01
+    local growCost = 0.0
     if p.energy >= growCost and not cult.getCell(gx, gy) then
       if cult.cellCount >= 5 then
         p.addEnergy(-growCost)
       end
 
-      local type = cult.getTypeMap(x, y)
-      if type then
-        if type ~= "plast" or not cult.exhausted then
-          cult.setCell(gx, gy, cell({type = type}, cult))
-          cult.cellCount = cult.cellCount + 1
-          cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
-        end
+      local type = cult.getTypeMap(gx, gy)
+      if type and (type ~= "plast" or not cult.exhausted) then
+        cult.setCell(gx, gy, cell({type = type}, cult))
+        cult.cellCount = cult.cellCount + 1
+        cult.massX, cult.massY = cult.massX + (gx - cult.maxSize * 0.5), cult.massY + (gy - cult.maxSize * 0.5)
       end
     end
 

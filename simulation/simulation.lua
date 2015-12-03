@@ -1,7 +1,7 @@
 simulation = {}
 simulation.agents = {}
 simulation.sortedAgents = {}
-simulation.size = 200
+simulation.size = 100
 simulation.populationSize = 100
 
 

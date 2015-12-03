@@ -9,7 +9,7 @@ function agent(p)
 
   local reshape, newBody, fixture, shape = physics.circle(x, y, 0.5, 0.5, "dynamic")
   newBody:setUserData(p)
-  newBody:setLinearDamping(5)
+  newBody:setLinearDamping(0)
   newBody:setBullet(true)
   newBody:setAngularDamping(50)
   newBody:setAngle(math.random() * math.pi * 2)
@@ -28,7 +28,7 @@ function agent(p)
   p.maxStrain = 50000
   p.strain = math.random(0,p.maxStrain)
   p.tolerance = 10000
-  p.stableAge = 5
+  p.stableAge = 1
   p.rCost = 900
   p.eRate = 6
   p.rRate = 1000

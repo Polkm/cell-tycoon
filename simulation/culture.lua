@@ -60,11 +60,11 @@ function culture(p, worker, id)
   p.getTypeMap = getTypeMap
 
   function p.setRandomTypeMap()
-    local types = {"fat", "mover"}
+    local types = {"fat", "mover", "plast"}
 
     setTypeMap(p.maxSize * 0.5, p.maxSize * 0.5, "brain")
 
-    for i = 1, math.randomn(100, 10) do
+    for i = 1, clamp(math.randomn(20, 200), 2, 500) do
       local i, randType = table.random(typeMap)
       local x, y = i % maxSize + math.random(-1, 1), math.floor(i / maxSize) + math.random(-1, 1)
       if not getTypeMap(x, y) then
@@ -82,9 +82,7 @@ function culture(p, worker, id)
     if p.imageData then
       p.imageData:mapPixel(function(x, y, r, g, b, a)
         local v = getCell(x, y)
-        if v then
-          return v.getColor()
-        end
+        if v then return v.getColor() end
         return 0, 0, 0, 0
       end)
     end
@@ -143,7 +141,7 @@ function culture(p, worker, id)
     end
     for _, cell in pairs(cells) do
       if cell.type == "fat" then
-        cell.energy = cell.energy + mass / fatCount
+        cell.energy = cell.energy + (mass * 10) / fatCount
       end
     end
   end
