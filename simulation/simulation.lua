@@ -1,8 +1,8 @@
 simulation = {}
 simulation.agents = {}
 simulation.sortedAgents = {}
-simulation.size = 100
-simulation.populationSize = 100
+simulation.size = 160
+simulation.populationSize = 60
 
 
 require("simulation/camera")
