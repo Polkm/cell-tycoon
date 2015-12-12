@@ -28,7 +28,7 @@ function agent(p)
   p.maxStrain = 50000
   p.strain = math.random(0,p.maxStrain)
   p.tolerance = 10000
-  p.stableAge = 1
+  p.stableAge = 15
   p.rCost = 900
   p.eRate = 6
   p.rRate = 1000
