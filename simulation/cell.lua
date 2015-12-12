@@ -98,7 +98,7 @@ function cell(p, cult)
     end
 
     -- Growing
-    local growCost = 0.0
+    local growCost = 0.5
     if p.energy >= growCost and not cult.getCell(gx, gy) then
       if cult.cellCount >= 5 then
         p.addEnergy(-growCost)
